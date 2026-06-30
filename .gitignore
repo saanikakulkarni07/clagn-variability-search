@@ -1,0 +1,22 @@
+# Python
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+*.egg-info/
+
+# Data products (keep these out of git — regenerate or store externally)
+data/raw/
+data/interim/
+data/processed/
+*.parquet
+*.fits
+*.h5
+*.hdf5
+
+# Notebook output scratch
+*.log
+
+# OS
+.DS_Store

@@ -1,0 +1,13 @@
+# Most of these are preinstalled in the Fornax default `python3` kernel.
+# Listed for local dev / reproducibility. Pin versions once the env is settled.
+numpy
+scipy
+pandas
+matplotlib
+astropy
+astroquery        # SIMBAD/NED name resolution, archive queries
+pyarrow           # Parquet checkpoints
+# --- provided by Fornax, do NOT pip install on the Console ---
+# dask
+# lsdb
+# (light_curve_collector helper modules come from the fornax-demo-notebooks repo)
