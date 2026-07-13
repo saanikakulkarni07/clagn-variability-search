@@ -27,6 +27,13 @@ THRESHOLDS = {
     "wise_color_transition": 0.5,  # crossing ~0.5 (either direction) flags a transition
     # Normalized excess variance significance flag (Nandra+1997; Vaughan+2003)
     "nxs_sigma": 3.0,
+    # Sustained monotonic mid-IR trend (Spearman |rho|): a slow, one-directional
+    # W1/W2 fade or rise is the dust-echo signature of an accretion-state change,
+    # and is a stronger CLAGN discriminant than a two-epoch color difference.
+    # Design prior — recalibrate via injection-recovery (PLAN.md section 7).
+    "trend_monotonic": 0.6,
+    # Two-epoch color-change corroboration (weak proxy; see trend_monotonic)
+    "color_corroboration": 0.2,
 }
 
 
@@ -113,15 +120,18 @@ def is_candidate(features: dict) -> bool:
     """Apply the prior thresholds to a per-object feature dict.
 
     `features` should contain keys like: delta_w1, delta_w2, delta_g,
-    wise_color_change, nxs_significance. Missing keys are treated as non-passing.
+    wise_color_change, trend_w1. Missing keys are treated as non-passing.
     This is a PRIOR filter for the smoke test / first pass — the production
     selection is the injection-recovery-calibrated, multi-dimensional version.
     """
     t = THRESHOLDS
-    mir = (features.get("delta_w1", 0) > t["delta_w_clagn"]
-           and features.get("delta_w2", 0) > t["delta_w_clagn"])
+    mir_amp = (features.get("delta_w1", 0) > t["delta_w_clagn"]
+               and features.get("delta_w2", 0) > t["delta_w_clagn"])
     opt = abs(features.get("delta_g", 0)) > t["delta_g_evq"]
-    color = abs(features.get("wise_color_change", 0)) > 0.2
-    # CLAGN-like: a mid-IR transition with corroborating color change, OR a
-    # strong optical EVQ-level event. (Cross-band lag-coherence added in stage 4.)
-    return (mir and color) or opt
+    color = abs(features.get("wise_color_change", 0)) > t["color_corroboration"]
+    trend = abs(features.get("trend_w1", 0)) > t["trend_monotonic"]
+    # A mid-IR transition counts as CLAGN-like when its amplitude clears the cut
+    # AND it is corroborated EITHER by a color change OR (more robustly) by a
+    # sustained monotonic W1 trend. Plus a strong optical EVQ-level event as an
+    # independent channel. (Cross-band lag-coherence added in stage 4.)
+    return (mir_amp and (color or trend)) or opt
