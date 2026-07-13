@@ -79,21 +79,32 @@ def monotonic_trend(time: np.ndarray, mag: np.ndarray) -> float:
         return float(np.corrcoef(rt, rm)[0, 1])
 
 
-def wise_color_change(w1: np.ndarray, w2: np.ndarray) -> float:
+def wise_color_change(w1_time, w1, w2_time, w2, tol_days: float = 1.0) -> float:
     """Change in W1-W2 color across the baseline (early-epoch vs late-epoch median).
+
+    W1 and W2 come from the same NEOWISE exposures but per-band quality cuts can
+    drop different epochs, leaving ragged, unequal-length arrays. So we align the
+    two bands on time (nearest match within `tol_days`) before differencing rather
+    than assuming equal-length, position-aligned arrays.
 
     Positive => reddening toward AGN-like (possible turn-on);
     negative => bluing away from AGN-like (possible turn-off).
     CAUTION: TDEs/ANTs redden FASTER than CLAGN (You+2025) — use the multi-epoch
     color *track*, not just the endpoints, to separate them.
     """
-    w1 = np.asarray(w1, float)
-    w2 = np.asarray(w2, float)
-    color = w1 - w2
-    good = np.isfinite(color)
-    color = color[good]
-    if color.size < 4:
+    import pandas as pd
+
+    a = pd.DataFrame({"t": np.asarray(w1_time, float), "w1": np.asarray(w1, float)}).dropna()
+    b = pd.DataFrame({"t": np.asarray(w2_time, float), "w2": np.asarray(w2, float)}).dropna()
+    if len(a) < 4 or len(b) < 4:
         return np.nan
+    merged = pd.merge_asof(
+        a.sort_values("t"), b.sort_values("t"),
+        on="t", tolerance=tol_days, direction="nearest",
+    ).dropna()
+    if len(merged) < 4:
+        return np.nan
+    color = (merged["w1"] - merged["w2"]).to_numpy()
     n = max(2, color.size // 4)
     return float(np.median(color[-n:]) - np.median(color[:n]))
 
