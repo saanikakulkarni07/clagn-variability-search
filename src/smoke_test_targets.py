@@ -52,16 +52,22 @@ TARGETS = [
         expected_event="dramatic 2018 changing-look outburst; strong all-band event (dec +65, deep ZTF)",
         ref="Trakhtenbrot+2019; Ricci+2020",
     ),
-    # --- SLOT 5: TODO pin a specific mid-IR-SELECTED CLAGN (Sheng 2020 / Yang 2024) ---
-    # Purpose: test the actual DISCOVERY channel, not just bright archetypes.
-    # Pick one of the 6 spectroscopically-confirmed turn-off CLAGN in Sheng+2020,
-    # or a turn-on CLQ from Yang+2024, that is ZTF-accessible. Fill in real coords.
+    # --- SLOT 5: the DISCOVERY-CHANNEL test (mid-IR-SELECTED CLAGN) ---
+    # This is the only target that exercises what the survey actually does:
+    # recover a FAINT, mid-IR-variability-SELECTED transition, not a bright
+    # archetype. Chosen from Sheng+2020's systematic NEOWISE-variability search
+    # (the methodological precedent for this project). Picked specifically because
+    # its transition (~2013-2018) is the most IN-WINDOW of that sample -- inside
+    # NEOWISE (2014+) and reaching the start of ZTF (2018) -- so it is a fair test
+    # of in-baseline recovery (cf. NGC 2617, whose 2013 turn-on is edge-of-window
+    # and got missed by the prior thresholds).
     CLAGN(
-        name="TODO-midIR-selected-CLAGN",
-        direction="turn-on",
-        ra_deg=float("nan"), dec_deg=float("nan"),
-        expected_event="mid-IR-selected transition recovered (W1-W2 color crossing ~0.5)",
-        ref="Sheng+2020 / Yang+2024 — SELECT SPECIFIC OBJECT",
+        name="SDSS J162752.18+541912.5",
+        direction="turn-off",
+        ra_deg=246.9674, dec_deg=54.3201,  # 16:27:52.18 +54:19:12.5; z=0.316
+        expected_event="mid-IR-selected turn-off (Type 1 -> 1.9): W1/W2 fade + "
+                       "AGN->galaxy color crossing (~0.5), transition ~2013-2018",
+        ref="Sheng+2020 (arXiv:1905.02904)",
     ),
 ]
 
